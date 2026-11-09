@@ -8,6 +8,25 @@ remote computers, for machines whose client is stuck (no scan, stale compliance 
 > triggers update scans. Use a maintenance window and test on a non-production machine first.
 > Provided as-is, without warranty (see [LICENSE](LICENSE)).
 
+## Issues it fixes
+
+Typical symptoms that mean a client's WSUS / Windows Update / SCCM stack is stuck and worth
+resetting with this script:
+
+- Windows Update stuck checking for updates, or scan never completes.
+- SCCM / MECM compliance state stuck at **Unknown** or not refreshing after a deployment.
+- Software Center shows no available updates while WSUS/SUP has them published.
+- `wuauserv` or `ccmexec` won't stop, hangs on restart, or the service is unresponsive.
+- BITS job stuck at 0% or queued forever (`bitsadmin` shows a stalled transfer).
+- Windows Update errors such as `0x80244022`, `0x8024401c`, `0x80072ee2`, or
+  `0x87d00215` / `0x87d00669` on the SCCM client side.
+- `Registry.pol` corrupted or with an invalid header after a GPO change.
+- Stale WinHTTP proxy left over from a decommissioned proxy server blocking WSUS/SUP access.
+
+If re-registering the BITS/WU DLLs, clearing `SoftwareDistribution`, or a manual `wuauclt
+/resetauthorization /detectnow` already hasn't helped, this script automates the fuller reset
+(services, BITS queue, policy, proxy, GPO, SCCM schedules) across one or many remote computers.
+
 ## What it does
 
 On each target, through PowerShell remoting:
